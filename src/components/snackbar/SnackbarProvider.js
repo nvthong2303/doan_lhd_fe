@@ -13,10 +13,11 @@ import StyledNotistack from './styles';
 // ----------------------------------------------------------------------
 
 SnackbarProvider.propTypes = {
-  children: PropTypes.node,
+  message: String,
+  variant: String
 };
 
-export default function SnackbarProvider({ children }) {
+export default function SnackbarProvider({ message, variant }) {
   const { themeDirection } = useSettingsContext();
 
   const isRTL = themeDirection === 'rtl';
@@ -38,7 +39,7 @@ export default function SnackbarProvider({ children }) {
         preventDuplicate
         autoHideDuration={3000}
         TransitionComponent={isRTL ? Collapse : undefined}
-        variant="success" // Set default variant
+        variant={variant || "success"} // Set default variant
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         iconVariant={{
           info: <SnackbarIcon icon="eva:info-fill" color="info" />,
@@ -53,7 +54,7 @@ export default function SnackbarProvider({ children }) {
           </IconButton>
         )}
       >
-        {children}
+        {message}
       </NotistackProvider>
     </>
   );

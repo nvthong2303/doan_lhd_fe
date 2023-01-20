@@ -26,12 +26,12 @@ export default function LearningPage() {
         />
 
         <Grid container spacing={3} marginBottom={3}>
-          <Grid item xs={12} md={8}>
+          <Grid item xs={12} md={12}>
             <SectionList />
           </Grid>
-          <Grid item xs={12} md={4} sx={{ display: { xs: 'none', md: 'block' } }}>
+          {/* <Grid item xs={12} md={4} sx={{ display: { xs: 'none', md: 'block' } }}>
             <UserDisplay user={mockUser} />
-          </Grid>
+          </Grid> */}
         </Grid>
       </Container>
     </>

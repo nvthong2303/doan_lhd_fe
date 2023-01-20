@@ -32,6 +32,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 // routes
+import { SnackbarProvider } from 'notistack';
 import Router from './routes';
 // theme
 import ThemeProvider from './theme';
@@ -39,7 +40,6 @@ import ThemeProvider from './theme';
 import ThemeLocalization from './locales';
 // components
 import { StyledChart } from './components/chart';
-import SnackbarProvider from './components/snackbar';
 import ScrollToTop from './components/scroll-to-top';
 import { MotionLazyContainer } from './components/animate';
 import { ThemeSettings, SettingsProvider } from './components/settings';

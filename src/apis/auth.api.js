@@ -9,7 +9,6 @@ export const registerApi = async (data) => {
         method: 'post',
         url: `${URL_BE}users/register`,
         headers: {
-            // Authorization: `Bearer ${TOKEN_EMSO}`
         },
         data
     };
@@ -22,10 +21,22 @@ export const loginApi = async (data) => {
         method: 'post',
         url: `${URL_BE}users/login`,
         headers: {
-            // Authorization: `Bearer ${TOKEN_EMSO}`
         },
         data
     };
     const response = await axios(config);
     return response;
 };
+
+export const getInfoApi = async (token) => {
+    const config = {
+        method: 'get',
+        url: `${URL_BE}users/info`,
+        headers: {
+            Authorization: `Bearer ${token}`
+        },
+    };
+    const response = await axios(config);
+    return response;
+};
+

@@ -15,11 +15,13 @@ import { HEADER } from '../../config-global';
 import { PATH_AUTH, PATH_PAGE } from '../../routes/paths';
 // components
 import Logo from '../../components/logo';
+import { NavItem } from './nav/desktop/NavItem';
 //
 import navConfig from './nav/config-navigation';
 import NavMobile from './nav/mobile';
 import NavDesktop from './nav/desktop';
 import { useAuthContext } from '../../auth/useAuthContext';
+import { getInfoApi } from '../../apis/auth.api';
 
 // ----------------------------------------------------------------------
 
@@ -28,14 +30,28 @@ export default function Header() {
 
   const { isAuthenticated, user } = useAuthContext();
   const [isLoggin, setIsLoggin] = useState(false);
+  const [_user, setUser] = useState({});
 
   useEffect(() => {
-    const a = localStorage.getItem('accessToken')
-    if (a) {
-      console.log(a)
+    const token = localStorage.getItem('accessToken')
+    if (token) {
+      getInfo(token);
       setIsLoggin(true)
     }
   }, [])
+
+  const getInfo = async (token) => {
+    const res = await getInfoApi(token);
+
+    if (res.status === 200) {
+      setUser(res.data.user)
+    }
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem('accessToken')
+    setUser({})
+  }
 
   const theme = useTheme();
 
@@ -71,7 +87,7 @@ export default function Header() {
 
           {isDesktop && <NavDesktop isOffset={isOffset} data={navConfig} />}
 
-          {isLoggin ? (
+          {_user.firstName ? (
             // <Link to={PATH_PAGE.account}>
             //   <Avatar
             //     alt={user.displayName}
@@ -83,7 +99,24 @@ export default function Header() {
             //     }}
             //   />
             // </Link>
-            <p>hahaha</p>
+            // <p style={{
+            //   lineHeight: '1.5',
+            //   fontSize: '1rem',
+            //   fontFamily: 'Public Sans,sans-serif',
+            //   fontWeight: '400'
+            // }}>{_user.firstName ? `Hi, ${_user.firstName} ${_user.lastName}` : 'Hi!'}</p>
+            <>
+              <NavItem item={{
+                title: `Hi, ${_user.firstName} ${_user.lastName}`
+              }} />
+              <NavItem
+                onClick={handleLogout}
+                sx={{ marginLeft: '20px' }}
+                item={{
+                  title: 'Logout'
+                }}
+              />
+            </>
           ) : (
             <>
               <Link to={PATH_AUTH.register}>
@@ -101,6 +134,7 @@ export default function Header() {
           {!isDesktop && <NavMobile isOffset={isOffset} data={navConfig} />}
         </Container>
       </Toolbar>
+
 
       {isOffset && <Shadow />}
     </AppBar>

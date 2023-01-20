@@ -57,6 +57,7 @@ export default function AuthLoginForm() {
         console.log(res.data)
         setIsLoading(false)
         localStorage.setItem('accessToken', res.data.token)
+        localStorage.setItem('datn_email', data.email)
         history('/');
       } else {
         setIsLoading(false)
