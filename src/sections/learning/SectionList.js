@@ -17,15 +17,24 @@ import {
   DialogContentText,
   DialogTitle,
   Autocomplete,
-  Alert
+  IconButton,
+  Tooltip,
+  CardHeader
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import _ from 'lodash';
 import { useSnackbar } from 'notistack';
 import { useFormik } from 'formik';
 import { searchWordApi } from '../../apis/word.api';
-import { createLessonApi, getListLessonApi, getListLessonAuthApi, searchLessonApi } from '../../apis/lesson.api';
+import {
+  createLessonApi,
+  getListLessonApi,
+  getListLessonAuthApi,
+  searchLessonApi,
+  getListLessonUnAuthApi
+} from '../../apis/lesson.api';
 import Iconium from '../../components/iconify/Iconify';
+import { addLessonUserApi } from '../../apis/auth.api';
 
 const SectionList = () => {
   const [listLesson, setListLesson] = useState([]);
@@ -45,8 +54,10 @@ const SectionList = () => {
     if (token) {
       setIsLogin(token)
       fetchListLessonAuth(token)
+      fetchListLessonUnAuth(token)
+    } else {
+      fetchListLesson()
     }
-    fetchListLesson()
   }, []);
 
   useEffect(() => {
@@ -67,6 +78,15 @@ const SectionList = () => {
 
   const fetchListLesson = async () => {
     const res = await getListLessonApi()
+
+    if (res.status === 200) {
+      console.log('list lesson', res.data.data)
+      setListLesson(res.data.data)
+    }
+  }
+
+  const fetchListLessonUnAuth = async (token) => {
+    const res = await getListLessonUnAuthApi(token)
 
     if (res.status === 200) {
       console.log('list lesson', res.data.data)
@@ -126,7 +146,6 @@ const SectionList = () => {
         handleClose()
         fetchListLessonAuth(isLogin)
       } else {
-        console.log(res)
         enqueueSnackbar('Create failed', { variant: 'error' });
       }
     } catch (error) {
@@ -159,6 +178,26 @@ const SectionList = () => {
       console.log(err)
     }
   }, 1000);
+
+  const handleAddLesson = async (section) => {
+    try {
+      const data = {
+        lessonId: section._id
+      }
+      const token = isLogin
+      const res = await addLessonUserApi(data, token)
+
+      if (res.status === 200) {
+        enqueueSnackbar('Add Success', { variant: 'success' });
+        fetchListLessonAuth(token)
+        fetchListLessonUnAuth(token)
+      } else {
+        enqueueSnackbar('Add failed', { variant: 'error' });
+      }
+    } catch (error) {
+      enqueueSnackbar(error.response.data.message, { variant: 'error' });
+    }
+  }
 
   return (
     <>
@@ -288,6 +327,17 @@ const SectionList = () => {
                   width: '240px'
                 }}
               >
+                {isLogin ? (
+                  <CardHeader
+                    action={
+                      <Tooltip title="Add lesson to my list lesson">
+                        <IconButton aria-label="settings" sx={{ width: '30x', height: 'auto' }} onClick={() => handleAddLesson(section)}>
+                          <Iconium icon="material-symbols:add" width={20} />
+                        </IconButton>
+                      </Tooltip>
+                    }
+                  />
+                ) : null}
                 <Box padding={3} display="flex" justifyContent="center" alignItems="center" height={200}>
                   <Iconium icon="mdi:user" width={48} />
                 </Box>
@@ -304,6 +354,7 @@ const SectionList = () => {
                   <Typography sx={{ marginTop: '8px !important' }} fontSize={12}>Description: {section.description}</Typography>
                   <Typography sx={{ marginTop: '0px !important' }} fontSize={12}>Total exercise: {section.exercise.length}</Typography>
                 </Stack>
+
               </Card>
             ))}
           </Box>

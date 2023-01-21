@@ -54,6 +54,14 @@ export default function Router() {
         { path: ':id', element: <LearningSectionPage /> },
       ],
     },
+    {
+      path: 'translation',
+      element: <MainLayout />,
+      children: [
+        { element: <TranslationItemPage />, index: true },
+        { path: ':id', element: <LearningSectionPage /> },
+      ],
+    },
 
     // Main Routes
     {
@@ -63,7 +71,6 @@ export default function Router() {
         { element: <TranslationItemPage />, path: '/translation/:word' },
       ],
     },
-
     {
       element: <CompactLayout />,
       children: [{ path: '404', element: <Page404 /> }],

@@ -7,18 +7,23 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { Stack, IconButton, InputAdornment, Alert } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 // auth
+import { useSnackbar } from 'notistack';
+import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../../auth/useAuthContext';
 // components
 import Iconify from '../../components/iconify';
 import FormProvider, { RHFTextField } from '../../components/hook-form';
+import { registerApi } from '../../apis/auth.api';
 
 // ----------------------------------------------------------------------
 
 export default function AuthRegisterForm() {
-  const { register } = useAuthContext();
+  // const { register } = useAuthContext();
 
   const [showPassword, setShowPassword] = useState(false);
-
+  const [isLoading, setIsloading] = useState(false)
+  const { enqueueSnackbar } = useSnackbar();
+  const navigate = useNavigate();
   const RegisterSchema = Yup.object().shape({
     firstName: Yup.string().required('First name required'),
     lastName: Yup.string().required('Last name required'),
@@ -47,16 +52,27 @@ export default function AuthRegisterForm() {
 
   const onSubmit = async (data) => {
     try {
-      if (register) {
-        await register(data.email, data.password, data.firstName, data.lastName);
+      setIsloading(true)
+      const res = await registerApi(data)
+
+      if (res.status === 200) {
+        setIsloading(false)
+        enqueueSnackbar('Register Success', { variant: 'success' });
+        localStorage.setItem('accessToken', res.data.token)
+        localStorage.setItem('datn_email', data.email)
+        navigate('/')
+      } else {
+        setIsloading(false)
+        enqueueSnackbar('Register failed', { variant: 'error' });
       }
     } catch (error) {
-      console.error(error);
-      reset();
-      setError('afterSubmit', {
-        ...error,
-        message: error.message,
-      });
+      setIsloading(false);
+      enqueueSnackbar(error.response.data.message, { variant: 'error' });
+      // reset();
+      // setError('afterSubmit', {
+      //   ...error,
+      //   message: error.message,
+      // });
     }
   };
 
@@ -93,7 +109,7 @@ export default function AuthRegisterForm() {
           size="large"
           type="submit"
           variant="contained"
-          loading={isSubmitting || isSubmitSuccessful}
+          loading={isLoading}
           sx={{
             bgcolor: 'text.primary',
             color: (theme) => (theme.palette.mode === 'light' ? 'common.white' : 'grey.800'),

@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import { useRef, useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 // @mui
 import { useTheme } from '@mui/material/styles';
 import { Box, Button, AppBar, Toolbar, Container, Avatar } from '@mui/material';
@@ -27,7 +27,7 @@ import { getInfoApi } from '../../apis/auth.api';
 
 export default function Header() {
   const carouselRef = useRef(null);
-
+  const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthContext();
   const [isLoggin, setIsLoggin] = useState(false);
   const [_user, setUser] = useState({});
@@ -50,6 +50,8 @@ export default function Header() {
 
   const handleLogout = () => {
     localStorage.removeItem('accessToken')
+    localStorage.removeItem('datn_email')
+    window.location.reload(false);
     setUser({})
   }
 

@@ -40,3 +40,15 @@ export const getInfoApi = async (token) => {
     return response;
 };
 
+export const addLessonUserApi = async (data, token) => {
+    const config = {
+        method: 'post',
+        url: `${URL_BE}users/addLesson`,
+        headers: {
+            Authorization: `Bearer ${token}`
+        },
+        data
+    };
+    const response = await axios(config);
+    return response;
+};

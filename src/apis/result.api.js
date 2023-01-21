@@ -1,7 +1,7 @@
 /* eslint-disable import/no-unresolved */
 import axios from 'axios';
 import {
-    URL_BE
+    URL_BE, URL_SERVICE
 } from 'src/config/config';
 
 export const sendResultApi = async (blob) => {
@@ -10,7 +10,8 @@ export const sendResultApi = async (blob) => {
     data.append('file', file)
     const config = {
         method: 'post',
-        url: `${URL_BE}result/test`,
+        // url: `${URL_BE}result/test`,
+        url: `${URL_SERVICE}`,
         headers: {
             'Content-Type': `multipart/form-data`,
         },

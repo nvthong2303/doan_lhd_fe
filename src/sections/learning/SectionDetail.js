@@ -76,7 +76,6 @@ const SectionDetail = () => {
   }, [params, navigate]);
 
   useEffect(() => {
-    console.log(currentExercise)
     if (currentExercise && currentExercise.length > 0) {
       handleGetDetailWord(currentExercise)
     }
@@ -102,7 +101,7 @@ const SectionDetail = () => {
   }, []);
 
   useEffect(() => {
-    if (blob && isLogin) {
+    if (blob) {
       handleSendRecording()
     }
   }, [blob])
@@ -208,7 +207,13 @@ const SectionDetail = () => {
     recorder.stop().then(({ blob: newBlob }) => {
       setIsRecording(false);
       setBlob(newBlob);
+      // console.log(newBlob)
+      // const blobUrl = window.URL.createObjectURL(newBlob);
+
+      // console.log(blobUrl)
     });
+
+    Recorder.download(blob)
   };
 
   const handleClickNextExercise = () => {
@@ -232,13 +237,16 @@ const SectionDetail = () => {
         const _data = {
           lessonId, word, result: 75
         }
-        const token = isLogin
+        if (isLogin) {
+          const token = isLogin
 
-        const _res = await sendSaveResultApi(_data, token)
+          const _res = await sendSaveResultApi(_data, token)
 
-        if (_res.status === 200) {
-          console.log(_res.data)
+          if (_res.status === 200) {
+            console.log(_res.data)
+          }
         }
+
       }
     } catch (error) {
       console.log(error)

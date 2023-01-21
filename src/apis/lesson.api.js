@@ -30,7 +30,7 @@ export const getListLessonAuthApi = async (token) => {
 export const getListLessonUnAuthApi = async (token) => {
     const config = {
         method: 'get',
-        url: `${URL_BE}lesson/listUnAuth`,
+        url: `${URL_BE}lesson/listOtherAuth`,
         headers: {
             Authorization: `Bearer ${token}`
         },
