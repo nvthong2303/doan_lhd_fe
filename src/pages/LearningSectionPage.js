@@ -23,9 +23,6 @@ export default function LearningSectionPage() {
           <Grid item xs={12} md={12}>
             <SectionDetail />
           </Grid>
-          {/* <Grid item xs={12} md={4} sx={{ display: { xs: 'none', md: 'block' } }}>
-            <UserDisplay />
-          </Grid> */}
         </Grid>
       </Container>
     </>

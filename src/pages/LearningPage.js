@@ -29,9 +29,6 @@ export default function LearningPage() {
           <Grid item xs={12} md={12}>
             <SectionList />
           </Grid>
-          {/* <Grid item xs={12} md={4} sx={{ display: { xs: 'none', md: 'block' } }}>
-            <UserDisplay user={mockUser} />
-          </Grid> */}
         </Grid>
       </Container>
     </>

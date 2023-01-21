@@ -1,7 +1,6 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable react/prop-types */
-import { Card, CardContent, Divider, IconButton, Stack, Typography, Box, Link } from '@mui/material';
-import { useParams } from 'react-router-dom';
+import { Card, CardContent, Divider, IconButton, Stack, Typography, Box, Link, Grid } from '@mui/material';
 import Iconify from '../../components/iconify';
 import IconCambridge from '../../assets/icons/Cambridge.png'
 
@@ -17,7 +16,7 @@ export default function TranslationInfo({ listWordSearch }) {
   return (
     <Box>
       {listWordSearch.map(item => (
-        <Card sx={{ marginTop: '5px' }}>
+        <Card key={item._id} sx={{ marginTop: '5px' }}>
           <CardContent key={item._id}>
             <Stack
               direction="column"
@@ -31,25 +30,48 @@ export default function TranslationInfo({ listWordSearch }) {
                     <Iconify icon="fluent:megaphone-loud-16-regular" />
                   </IconButton>
                 </Box>
-                <Link target="_blank" sx={{ marginLeft: '12px', fontSize: 12 }} href={`https://dictionary.cambridge.org/dictionary/learner-english/${item.word}`}>
+                <Link target="_blank" sx={{ marginLeft: '12px', fontSize: 12 }} href={`https://dictionary.cambridge.org/dictionary/english/${item.word}`}>
                   <img src={IconCambridge} style={{ width: '20px', height: 'auto' }} />
                 </Link>
               </Box>
-              {/* <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant="body2">{`[${item.ipa}]`}</Typography>
-                <IconButton sx={{ marginLeft: '12px', fontSize: 12 }} onClick={() => handleListen(item)}>
-                  <Iconify icon="fluent:megaphone-loud-16-regular" />
-                </IconButton>
-              </Box> */}
               <Divider />
               <Typography variant="caption">{`Meaning: ${item.meaning.split('-')[1]}`}</Typography>
               {item.meaning.split('-')[2].length > 0 && (
-                <Typography variant="caption">{`Example: ${item.meaning.split('-')[2]}`}</Typography>
+                <Grid container>
+                  <Grid item xs={1}>
+                    <Typography variant="caption">Example :</Typography>
+                  </Grid>
+                  <Grid
+                    item
+                    xs={11}
+                    sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '5px' }}
+                  >
+                    {item.meaning.replace('-', '***').split('***').map(el => (
+                      <Typography variant="caption">{`${el}`}</Typography>
+                    ))}
+                  </Grid>
+                </Grid>
               )}
             </Stack>
           </CardContent>
         </Card>
-      ))}
-    </Box>
+      ))
+      }
+      {
+        listWordSearch.length === 0 ? (
+          <Card sx={{ marginTop: '5px' }}>
+            <CardContent>
+              <Stack
+                direction="column"
+                spacing={0.5}
+                alignItems="flex-start"
+              >
+                <Typography variant="caption">Input to search in DoAnTotNghiep dictionary</Typography>
+              </Stack>
+            </CardContent>
+          </Card>
+        ) : null
+      }
+    </Box >
   )
 };

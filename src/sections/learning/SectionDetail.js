@@ -1,3 +1,4 @@
+/* eslint-disable arrow-body-style */
 /* eslint-disable import/named */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable react-hooks/exhaustive-deps */
@@ -31,7 +32,7 @@ import configSectionList from './constant/config-section-list';
 import Iconify from '../../components/iconify';
 import { getDetailWordApi, searchWordApi } from '../../apis/word.api';
 import { addExerciseLessonApi, getDetailLessonApi } from '../../apis/lesson.api';
-import { sendResultApi, sendSaveResultApi } from '../../apis/result.api';
+import { sendResultApi, sendSaveResultApi, getResultApi } from '../../apis/result.api';
 
 const SectionDetail = () => {
   const theme = useTheme();
@@ -49,10 +50,12 @@ const SectionDetail = () => {
   const [openAdd, setOpenAdd] = useState(false)
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
   const [currentExercise, setCurrentExercise] = useState('');
+  const [currentIpa, setCurrentIpa] = useState('');
   const [listWordSearch, setListWordSearch] = useState([]);
   const [listWordSelected, setListWordSelected] = useState([]);
   const [currentEmailUser, setCurrentEmailUser] = useState('');
   const [currentDetailExercise, setCurrentDetailExercise] = useState({});
+  const [listResultExercise, setListResultExercise] = useState([])
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken')
@@ -78,6 +81,10 @@ const SectionDetail = () => {
   useEffect(() => {
     if (currentExercise && currentExercise.length > 0) {
       handleGetDetailWord(currentExercise)
+    }
+
+    if (isLogin) {
+      handleGetDetailResultExercise(detailLesson._id, currentExercise, isLogin)
     }
   }, [currentExercise]);
 
@@ -138,6 +145,20 @@ const SectionDetail = () => {
     }
   }
 
+  const handleGetDetailResultExercise = async (lessonId, word, token) => {
+    const _data = {
+      lessonId,
+      word
+    }
+    console.log(_data)
+    const res = await getResultApi(_data, token)
+
+    if (res.status === 200) {
+      console.log('detail result : ', res.data)
+      setListResultExercise(res.data.data.result)
+    }
+  }
+
   // handle add exercise
   const handleClickAddWord = () => {
     setOpenAdd(true)
@@ -191,10 +212,10 @@ const SectionDetail = () => {
 
   // handle learning
   const listenExercise = () => {
-    const url = currentDetailExercise.gp_audio_url
-      ? currentDetailExercise.gp_audio_url
-      : currentDetailExercise.us_audio_url
-        ? currentDetailExercise.us_audio_url
+    const url = currentDetailExercise.us_audio_url
+      ? currentDetailExercise.us_audio_url
+      : currentDetailExercise.gp_audio_url
+        ? currentDetailExercise.gp_audio_url
         : null
     new Audio(url).play()
   }
@@ -213,7 +234,7 @@ const SectionDetail = () => {
       // console.log(blobUrl)
     });
 
-    Recorder.download(blob)
+    // Recorder.download(blob)
   };
 
   const handleClickNextExercise = () => {
@@ -230,12 +251,12 @@ const SectionDetail = () => {
     try {
       const lessonId = detailLesson._id;
       const word = currentExercise;
-      const res = await sendResultApi(blob)
+      const res = await sendResultApi(blob, word)
 
       if (res.status === 200) {
-        console.log(res.data)
+        const point = compare2Ipa(currentDetailExercise.ipa, res.data.data.ipa ?? '')
         const _data = {
-          lessonId, word, result: 75
+          lessonId, word, result: point
         }
         if (isLogin) {
           const token = isLogin
@@ -244,6 +265,7 @@ const SectionDetail = () => {
 
           if (_res.status === 200) {
             console.log(_res.data)
+            handleGetDetailResultExercise(lessonId, word, token)
           }
         }
 
@@ -253,6 +275,60 @@ const SectionDetail = () => {
     }
   }
   // --------------------------------------------------------------------
+
+
+  const compare2Ipa = (ipaRoot, ipa) => {
+    let res = 0;
+    // eslint-disable-next-line no-plusplus
+    for (let i = 0; i < ipaRoot.length; i++) {
+      if (ipaRoot[i] === ipa[i]) {
+        res += 1;
+      }
+    }
+    return Math.trunc((res / ipaRoot.length) * 100)
+  }
+
+  const sort = (a, b) => {
+    if (a.createAt < b.createAt) {
+      return -1;
+    }
+    if (a.createAt > b.createAt) {
+      return 1;
+    }
+    return 0;
+  }
+
+
+  const progressBar = (point, index) => {
+    const containerStyles = {
+      height: '20px',
+      width: 'auto',
+      backgroundColor: "#212b36",
+      borderRadius: 50,
+    }
+
+    const fillerStyles = {
+      height: '100%',
+      width: `${point}%`,
+      backgroundColor: '#00ab55',
+      borderRadius: 'inherit',
+      textAlign: 'right'
+    }
+
+    const labelStyles = {
+      padding: 5,
+      color: 'white',
+    }
+
+    return (
+      <div style={containerStyles}>
+        <div style={fillerStyles}>
+          <span style={labelStyles}>{`${point}%`}</span>
+        </div>
+      </div>
+    )
+  }
+
 
   // TODO: GET exercise from API.
 
@@ -334,6 +410,19 @@ const SectionDetail = () => {
           </>
         ) : null}
       </Card>
+
+      {listResultExercise.length > 0 && (
+        <Box sx={{ marginTop: '20px' }}>
+          <Typography variant='h6'>Prev Result : </Typography>
+          {listResultExercise.sort(sort).map((el, index) => {
+            return (
+              <Card sx={{ marginTop: '10px', padding: '10px 20px' }}>
+                {progressBar(el.point, index)}
+              </Card>
+            )
+          })}
+        </Box>
+      )}
 
       <Dialog open={openAdd} onClose={handleClose} fullWidth >
         <DialogTitle>Add new word to this lesson</DialogTitle>
