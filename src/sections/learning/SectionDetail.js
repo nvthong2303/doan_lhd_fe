@@ -155,7 +155,7 @@ const SectionDetail = () => {
 
     if (res.status === 200) {
       console.log('detail result : ', res.data)
-      setListResultExercise(res.data.data.result)
+      setListResultExercise(res.data.data?.result ?? [])
     }
   }
 
@@ -254,6 +254,7 @@ const SectionDetail = () => {
       const res = await sendResultApi(blob, word)
 
       if (res.status === 200) {
+        console.log('res service', res.data)
         const point = compare2Ipa(currentDetailExercise.ipa, res.data.data.ipa ?? '')
         const _data = {
           lessonId, word, result: point
@@ -271,7 +272,7 @@ const SectionDetail = () => {
 
       }
     } catch (error) {
-      console.log(error)
+      console.log('err res service', error)
     }
   }
   // --------------------------------------------------------------------

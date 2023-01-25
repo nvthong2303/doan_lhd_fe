@@ -26,23 +26,36 @@ export const sendResultApi = async (blob, word) => {
     // const data = new FormData()
     // const file = new File([blob], `file.wav`)
     // data.append('file', file)
-
+    console.log(URL.createObjectURL(blob))
     const audiofile = new File([blob], "audiofile.wav", {
         type: "audio/wav",
     });
+    console.log('audiofile', audiofile)
     const formData = new FormData();
     formData.append("file", audiofile, 'test.wav');
-    const config = {
-        method: 'post',
-        url: `${URL_SERVICE}`,
-        headers: {
-            'Content-Type': `multipart/form-data`,
-        },
-        formData
-    };
-    const response = await axios(config);
+    console.log('data', formData)
+    // const config = {
+    //     method: 'post',
+    //     url: `${URL_SERVICE}`,
+    //     headers: {
+    //         'Content-Type': `multipart/form-data`,
+    //         'Accept': 'application/json',
+    //     },
+    //     formData
+    // };
+    // const response = await axios(config);
+
+    const response = await axios.post(
+        `${URL_SERVICE}`,
+        formData,
+        {
+            'Accept': 'application/json',
+            "content-type": "multipart/form-data",
+        }
+    );
     return response;
 }
+
 
 export const sendSaveResultApi = async (data, token) => {
     const config = {
