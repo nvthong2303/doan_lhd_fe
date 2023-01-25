@@ -255,7 +255,7 @@ const SectionDetail = () => {
 
       if (res.status === 200) {
         console.log('res service', res.data)
-        const point = compare2Ipa(currentDetailExercise.ipa, res.data.data.ipa ?? '')
+        const point = compare2Ipa(currentDetailExercise.ipa, res.data.ipa ?? '')
         const _data = {
           lessonId, word, result: point
         }
