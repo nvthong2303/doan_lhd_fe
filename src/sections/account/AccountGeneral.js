@@ -17,7 +17,6 @@ import { getInfoApi, updateInFoUserApi } from "../../apis/auth.api";
 export default function AccountGeneral() {
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
-  const [disabled, setDisabled] = useState(false);
   const [user, setUser] = useState({
     firstName: '',
     lastName: '',
@@ -46,7 +45,7 @@ export default function AccountGeneral() {
       // handleSubmitForm(events);
       if (JSON.stringify(user) !== JSON.stringify(events)) {
         console.log(events)
-        updateInfo(events)
+        handleUpdateInfo(events)
       }
     }
   });
@@ -83,19 +82,22 @@ export default function AccountGeneral() {
     }
   }
 
-  const updateInfo = async (data) => {
+  const handleUpdateInfo = async (data) => {
     try {
-      console.log(data)
+      setLoading(true)
       const res = await updateInFoUserApi(data, login)
 
       if (res.status === 200) {
+        setLoading(false)
         localStorage.setItem('accessToken', res.data.token)
         getInfo(res.data.token)
         enqueueSnackbar(res.data.message, { variant: 'success' });
       } else if (res.status === 201) {
+        setLoading(false)
         enqueueSnackbar(res.data.message, { variant: 'error' });
       } else {
-        console.log(res.data)
+        setLoading(false)
+        console.log('error update password', res.data)
       }
     } catch (error) {
       console.log('error update info', error)

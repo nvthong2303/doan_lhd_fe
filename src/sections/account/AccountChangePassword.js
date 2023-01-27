@@ -1,81 +1,126 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import * as Yup from 'yup';
+import { useState, useEffect } from 'react';
 // form
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm } from 'react-hook-form';
+import { useFormik } from 'formik';
 // @mui
-import { Stack, Card } from '@mui/material';
+import { Stack, Card, TextField } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 // components
-import Iconify from '../../components/iconify';
+import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '../../components/snackbar';
-import FormProvider, { RHFTextField } from '../../components/hook-form';
+import { PATH_PAGE } from '../../routes/paths';
+import { updatePasswordUserApi } from '../../apis/auth.api';
 
 // ----------------------------------------------------------------------
 
 export default function AccountChangePassword() {
   const { enqueueSnackbar } = useSnackbar();
+  const [loading, setLoading] = useState(false);
+  const [login, setLogin] = useState('')
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken')
+    if (token) {
+      setLogin(token)
+    } else {
+      navigate(PATH_PAGE.home)
+    }
+  }, [])
 
   const ChangePassWordSchema = Yup.object().shape({
     oldPassword: Yup.string().required('Old Password is required'),
     newPassword: Yup.string()
-      .min(6, 'Password must be at least 6 characters')
       .required('New Password is required'),
     confirmNewPassword: Yup.string().oneOf([Yup.ref('newPassword'), null], 'Passwords must match'),
   });
 
-  const defaultValues = {
+  const initialValues = {
     oldPassword: '',
     newPassword: '',
     confirmNewPassword: '',
   };
 
-  const methods = useForm({
-    resolver: yupResolver(ChangePassWordSchema),
-    defaultValues,
+
+  const formik = useFormik({
+    initialValues,
+    validationSchema: ChangePassWordSchema,
+    onSubmit: events => {
+      const data = {
+        oldPassword: events.oldPassword,
+        newPassword: events.newPassword
+      }
+      handleUpdatePassword(data)
+    }
   });
 
-  const {
-    reset,
-    handleSubmit,
-    formState: { isSubmitting },
-  } = methods;
-
-  const onSubmit = async (data) => {
+  const handleUpdatePassword = async (data) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      reset();
-      enqueueSnackbar('Update success!');
-      console.log('DATA', data);
+      const res = await updatePasswordUserApi(data, login)
+
+      if (res.status === 200) {
+        setLoading(false)
+        enqueueSnackbar(res.data.message, { variant: 'success' });
+      } else if (res.status === 202) {
+        setLoading(false)
+        enqueueSnackbar(res.data.message, { variant: 'error' });
+      } else {
+        setLoading(false)
+        enqueueSnackbar('Update info password failed', { variant: 'error' });
+      }
     } catch (error) {
-      console.error(error);
+      console.log('error update password', error)
+      enqueueSnackbar('Update info password failed', { variant: 'error' });
     }
-  };
+  }
 
   return (
-    <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={formik.handleSubmit}>
       <Card>
         <Stack spacing={3} alignItems="flex-end" sx={{ p: 3 }}>
-          <RHFTextField name="oldPassword" type="password" label="Old Password" />
-
-          <RHFTextField
-            name="newPassword"
-            type="password"
-            label="New Password"
-            helperText={
-              <Stack component="span" direction="row" alignItems="center">
-                <Iconify icon="eva:info-fill" width={16} sx={{ mr: 0.5 }} /> Password must be
-                minimum 6+
-              </Stack>
+          <TextField
+            fullWidth
+            type='password'
+            placeholder='Old Password'
+            name="oldPassword"
+            value={formik.values.oldPassword}
+            onChange={formik.handleChange}
+            error={
+              formik.touched.oldPassword && Boolean(formik.errors.oldPassword)
             }
+            helperText={formik.touched.oldPassword && formik.errors.oldPassword}
+          />
+          <TextField
+            fullWidth
+            type='password'
+            placeholder='New Password'
+            name="newPassword"
+            value={formik.values.newPassword}
+            onChange={formik.handleChange}
+            error={
+              formik.touched.newPassword && Boolean(formik.errors.newPassword)
+            }
+            helperText={formik.touched.newPassword && formik.errors.newPassword}
+          />
+          <TextField
+            fullWidth
+            type='password'
+            placeholder='Confirm New Password'
+            name="confirmNewPassword"
+            value={formik.values.confirmNewPassword}
+            onChange={formik.handleChange}
+            error={
+              formik.touched.confirmNewPassword && Boolean(formik.errors.confirmNewPassword)
+            }
+            helperText={formik.touched.confirmNewPassword && formik.errors.confirmNewPassword}
           />
 
-          <RHFTextField name="confirmNewPassword" type="password" label="Confirm New Password" />
-
-          <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
+          <LoadingButton type="submit" variant="contained" loading={loading}>
             Save Changes
           </LoadingButton>
         </Stack>
       </Card>
-    </FormProvider>
+    </form>
   );
 }

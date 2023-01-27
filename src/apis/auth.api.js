@@ -65,3 +65,16 @@ export const updateInFoUserApi = async (data, token) => {
     const response = await axios(config);
     return response;
 };
+
+export const updatePasswordUserApi = async (data, token) => {
+    const config = {
+        method: 'post',
+        url: `${URL_BE}users/updatePassword`,
+        headers: {
+            Authorization: `Bearer ${token}`
+        },
+        data
+    };
+    const response = await axios(config);
+    return response;
+};
