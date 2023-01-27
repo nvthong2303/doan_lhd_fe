@@ -19,9 +19,7 @@ export default function Router() {
     {
       path: 'account',
       element: (
-        <AuthGuard>
-          <MainLayout />
-        </AuthGuard>
+        <MainLayout />
       ),
       children: [{ index: true, element: <UserAccountPage /> }],
     },

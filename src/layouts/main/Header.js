@@ -1,9 +1,10 @@
+/* eslint-disable react/jsx-no-bind */
 import PropTypes from 'prop-types';
 import { useRef, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 // @mui
 import { useTheme } from '@mui/material/styles';
-import { Box, Button, AppBar, Toolbar, Container, Avatar } from '@mui/material';
+import { Box, Button, AppBar, Toolbar, Container, MenuItem, Menu } from '@mui/material';
 // hooks
 import useOffSetTop from '../../hooks/useOffSetTop';
 import useResponsive from '../../hooks/useResponsive';
@@ -31,6 +32,17 @@ export default function Header() {
   const { isAuthenticated, user } = useAuthContext();
   const [isLoggin, setIsLoggin] = useState(false);
   const [_user, setUser] = useState({});
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  function handleClick(event) {
+    if (anchorEl !== event.currentTarget) {
+      setAnchorEl(event.currentTarget);
+    }
+  }
+
+  function handleClose() {
+    setAnchorEl(null);
+  }
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken')
@@ -51,8 +63,8 @@ export default function Header() {
   const handleLogout = () => {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('datn_email')
-    window.location.reload(false);
     setUser({})
+    navigate(PATH_PAGE.home)
   }
 
   const theme = useTheme();
@@ -90,35 +102,15 @@ export default function Header() {
           {isDesktop && <NavDesktop isOffset={isOffset} data={navConfig} />}
 
           {_user.firstName ? (
-            // <Link to={PATH_PAGE.account}>
-            //   <Avatar
-            //     alt={user.displayName}
-            //     src={user.photoURL}
-            //     sx={{
-            //       '&:hover': {
-            //         cursor: 'pointer',
-            //       },
-            //     }}
-            //   />
-            // </Link>
-            // <p style={{
-            //   lineHeight: '1.5',
-            //   fontSize: '1rem',
-            //   fontFamily: 'Public Sans,sans-serif',
-            //   fontWeight: '400'
-            // }}>{_user.firstName ? `Hi, ${_user.firstName} ${_user.lastName}` : 'Hi!'}</p>
-            <>
-              <NavItem item={{
-                title: `Hi, ${_user.firstName} ${_user.lastName}`
-              }} />
+            <Box
+              onClick={(e) => handleClick(e)}
+              onMouseOver={(e) => handleClick(e)}
+            >
               <NavItem
-                onClick={handleLogout}
-                sx={{ marginLeft: '20px' }}
                 item={{
-                  title: 'Logout'
-                }}
-              />
-            </>
+                  title: `Hi, ${_user.firstName} ${_user.lastName}`
+                }} />
+            </Box>
           ) : (
             <>
               <Link to={PATH_AUTH.register}>
@@ -139,6 +131,19 @@ export default function Header() {
 
 
       {isOffset && <Shadow />}
+
+      <Menu
+        id="simple-menu"
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+        MenuListProps={{ onMouseLeave: handleClose }}
+      >
+        <MenuItem onClick={() => {
+          navigate(PATH_PAGE.account)
+        }}>Setting profile</MenuItem>
+        <MenuItem onClick={() => handleLogout()}>Logout</MenuItem>
+      </Menu>
     </AppBar>
   );
 }

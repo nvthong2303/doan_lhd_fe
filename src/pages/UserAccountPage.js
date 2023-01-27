@@ -1,8 +1,9 @@
 import { Helmet } from 'react-helmet-async';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 // @mui
 import { Container, Tab, Tabs, Box } from '@mui/material';
 // routes
+import { useNavigate } from 'react-router-dom';
 import { PATH_PAGE } from '../routes/paths';
 // components
 import Iconify from '../components/iconify';
@@ -15,8 +16,16 @@ import { AccountGeneral, AccountChangePassword } from '../sections/account';
 
 export default function UserAccountPage() {
   const { themeStretch } = useSettingsContext();
-
   const [currentTab, setCurrentTab] = useState('general');
+  const navigate = useNavigate();
+
+
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken')
+    if (!token) {
+      navigate(PATH_PAGE.home)
+    }
+  }, [navigate])
 
   const TABS = [
     {
