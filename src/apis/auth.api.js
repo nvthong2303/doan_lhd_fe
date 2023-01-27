@@ -52,3 +52,16 @@ export const addLessonUserApi = async (data, token) => {
     const response = await axios(config);
     return response;
 };
+
+export const updateInFoUserApi = async (data, token) => {
+    const config = {
+        method: 'post',
+        url: `${URL_BE}users/update`,
+        headers: {
+            Authorization: `Bearer ${token}`
+        },
+        data
+    };
+    const response = await axios(config);
+    return response;
+};
