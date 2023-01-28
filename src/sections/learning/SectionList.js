@@ -31,10 +31,11 @@ import {
   getListLessonApi,
   getListLessonAuthApi,
   searchLessonApi,
-  getListLessonUnAuthApi
+  getListLessonUnAuthApi,
+  getDetailLessonApi
 } from '../../apis/lesson.api';
 import Iconium from '../../components/iconify/Iconify';
-import { addLessonUserApi } from '../../apis/auth.api';
+import { addLessonUserApi, removeLessonUserApi } from '../../apis/auth.api';
 
 const SectionList = () => {
   const [listLesson, setListLesson] = useState([]);
@@ -43,6 +44,7 @@ const SectionList = () => {
   const [open, setOpen] = useState(false);
   const [listWordSearch, setListWordSearch] = useState([]);
   const [currentEmailUser, setCurrentEmailUser] = useState('');
+  const [detailLesson, setDetailLesson] = useState({})
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -100,6 +102,12 @@ const SectionList = () => {
 
   const handleClose = () => {
     setOpen(false);
+    formik.setValues({
+      title: '',
+      description: '',
+      exercises: []
+    })
+    setDetailLesson({})
   };
 
   const handleSearchLesson = (value) => {
@@ -127,7 +135,7 @@ const SectionList = () => {
     onSubmit: values => {
       // callCreateApi(values);
       // handleClosePopupSMS();
-      handleCreateLesson(values)
+      // handleCreateLesson(values)
       console.log(values)
     }
   });
@@ -199,6 +207,65 @@ const SectionList = () => {
     }
   }
 
+  const handleRemoveLesson = async (section) => {
+    try {
+      const data = {
+        lessonId: section._id
+      }
+      const token = isLogin
+      const res = await removeLessonUserApi(data, token)
+
+      if (res.status === 200) {
+        enqueueSnackbar('Add Success', { variant: 'success' });
+        fetchListLessonAuth(token)
+        fetchListLessonUnAuth(token)
+      } else {
+        enqueueSnackbar('Add failed', { variant: 'error' });
+      }
+    } catch (error) {
+      enqueueSnackbar(error.response.data.message, { variant: 'error' });
+    }
+  }
+
+  const handleUpdateLesson = async (section) => {
+    try {
+      console.log(section)
+      setOpen(true);
+      fetchDetailLesson(section._id)
+      // const data = {
+      //   lessonId: section._id
+      // }
+      // const token = isLogin
+      // const res = await removeLessonUserApi(data, token)
+
+      // if (res.status === 200) {
+      //   enqueueSnackbar('Add Success', { variant: 'success' });
+      //   fetchListLessonAuth(token)
+      //   fetchListLessonUnAuth(token)
+      // } else {
+      //   enqueueSnackbar('Add failed', { variant: 'error' });
+      // }
+    } catch (error) {
+      enqueueSnackbar(error.response.data.message, { variant: 'error' });
+    }
+  }
+
+  const fetchDetailLesson = async (id) => {
+    const res = await getDetailLessonApi(id)
+
+    if (res.status === 200) {
+      console.log('detail lesson', res.data.data)
+      setDetailLesson(res.data.data)
+      formik.setValues({
+        title: res.data.data.title,
+        description: res.data.data.description,
+        exercises: res.data.data.exercise
+      })
+    } else {
+      console.log('err get detail lesson', res)
+    }
+  }
+
   return (
     <>
       <Box
@@ -251,6 +318,27 @@ const SectionList = () => {
                       width: '240px'
                     }}
                   >
+                    {section.author !== currentEmailUser ? (
+                      <CardHeader
+                        action={
+                          <Tooltip title="Remove lesson from my list lesson">
+                            <IconButton aria-label="settings" sx={{ width: '30x', height: 'auto' }} onClick={() => handleRemoveLesson(section)}>
+                              <Iconium icon="material-symbols:remove" width={20} />
+                            </IconButton>
+                          </Tooltip>
+                        }
+                      />
+                    ) : (
+                      <CardHeader
+                        action={
+                          <Tooltip title="Add exercise to my lesson">
+                            <IconButton aria-label="settings" sx={{ width: '30x', height: 'auto' }} onClick={() => handleUpdateLesson(section)}>
+                              <Iconium icon="ph:pen-fill" width={20} />
+                            </IconButton>
+                          </Tooltip>
+                        }
+                      />
+                    )}
                     <Box padding={3} display="flex" justifyContent="center" alignItems="center" height={200}>
                       {section.author === currentEmailUser
                         ? <Iconium icon="mdi:user-edit" width={48} />
@@ -362,10 +450,12 @@ const SectionList = () => {
       </Box>
 
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Create new lesson</DialogTitle>
+        <DialogTitle>{Object.keys(detailLesson).length === 0 ? 'Create new lesson' : 'Update lesson'}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Create a new lesson, you can create your own English pronunciation learning route.
+            {Object.keys(detailLesson).length === 0
+              ? 'Create a new lesson, you can create your own English pronunciation learning route.'
+              : 'Update your lesson, you can update title, description, list exercise of your lesson.'}
           </DialogContentText>
           <TextField
             autoFocus
@@ -397,6 +487,7 @@ const SectionList = () => {
             id="size-small-standard-multi"
             size="small"
             options={listWordSearch}
+            defaultValue={['hello']}
             getOptionLabel={(option) => option.word}
             onChange={(event, value) => {
               onSelectWord(value);
@@ -417,7 +508,7 @@ const SectionList = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={formik.submitForm}>Create</Button>
+          <Button onClick={formik.submitForm}>{Object.keys(detailLesson).length === 0 ? 'Create' : 'Update'}</Button>
         </DialogActions>
       </Dialog>
     </>

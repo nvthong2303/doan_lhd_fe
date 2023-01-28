@@ -55,7 +55,8 @@ const SectionDetail = () => {
   const [listWordSelected, setListWordSelected] = useState([]);
   const [currentEmailUser, setCurrentEmailUser] = useState('');
   const [currentDetailExercise, setCurrentDetailExercise] = useState({});
-  const [listResultExercise, setListResultExercise] = useState([])
+  const [listResultExercise, setListResultExercise] = useState([]);
+  const [resultIpa, setResultIpa] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken')
@@ -221,6 +222,7 @@ const SectionDetail = () => {
   }
 
   const onRecord = () => {
+    setResultIpa('')
     recorder.start().then(() => setIsRecording(true));
   };
 
@@ -256,6 +258,7 @@ const SectionDetail = () => {
       if (res.status === 200) {
         console.log('res service', res.data)
         const point = compare2Ipa(currentDetailExercise.ipa, res.data.ipa[0] ?? '')
+        setResultIpa(res.data.ipa[0])
         const _data = {
           lessonId, word, result: point
         }
@@ -356,7 +359,7 @@ const SectionDetail = () => {
           <>
             <CardHeader
               title={`Exercise ${currentExerciseIndex + 1}: ${currentDetailExercise.word}`}
-              subheader={currentDetailExercise.ipa}
+            // subheader={currentDetailExercise.ipa}
             />
             <CardContent>
               <Stack direction="row" spacing={1} justifyContent="center">
@@ -388,7 +391,7 @@ const SectionDetail = () => {
                 />
               </Box>
             </CardContent>
-            <CardActions>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
               <Button
                 disabled={currentExerciseIndex === 0}
                 sx={{ marginRight: 'auto' }}
@@ -398,6 +401,28 @@ const SectionDetail = () => {
               >
                 Prev
               </Button>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignContent: 'center' }}>
+                <Typography variant="body2" display="block" gutterBottom>
+                  Standard : <span style={{ color: '#00AB55' }}>{currentDetailExercise.ipa}</span>
+                </Typography>
+                {resultIpa.length > 0 ? (
+                  <Typography
+                    variant="body2"
+                    display="block"
+                    gutterBottom
+                    sx={{ display: 'inline-block', alignItems: 'center' }}
+                  >
+                    <span>Your : </span>
+                    {
+                      resultIpa.split('').map((el, index) => {
+                        return (
+                          <span key={index} style={{ color: el !== currentDetailExercise.ipa.split('')[index] ? 'red' : '#00AB55' }}>{`${el}`}</span>
+                        )
+                      })
+                    }
+                  </Typography>
+                ) : null}
+              </Box>
               <Button
                 disabled={currentExerciseIndex === detailLesson.exercise.length - 1}
                 sx={{ marginLeft: 'auto' }}
@@ -407,7 +432,7 @@ const SectionDetail = () => {
               >
                 Next
               </Button>
-            </CardActions>
+            </Box>
           </>
         ) : null}
       </Card>
@@ -415,9 +440,9 @@ const SectionDetail = () => {
       {listResultExercise.length > 0 && (
         <Box sx={{ marginTop: '20px' }}>
           <Typography variant='h6'>Prev Result : </Typography>
-          {listResultExercise.sort(sort).map((el, index) => {
+          {listResultExercise.sort(sort).slice(0, 3).map((el, index) => {
             return (
-              <Card sx={{ marginTop: '10px', padding: '10px 20px' }}>
+              <Card key={index} sx={{ marginTop: '10px', padding: '10px 20px' }}>
                 {progressBar(el.point, index)}
               </Card>
             )

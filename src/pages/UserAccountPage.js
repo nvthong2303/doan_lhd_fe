@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 // @mui
 import { Container, Tab, Tabs, Box } from '@mui/material';
 // routes
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { PATH_PAGE } from '../routes/paths';
 // components
 import Iconify from '../components/iconify';
@@ -11,14 +11,13 @@ import CustomBreadcrumbs from '../components/custom-breadcrumbs';
 import { useSettingsContext } from '../components/settings';
 // sections
 import { AccountGeneral, AccountChangePassword } from '../sections/account';
-
 // ----------------------------------------------------------------------
 
 export default function UserAccountPage() {
   const { themeStretch } = useSettingsContext();
   const [currentTab, setCurrentTab] = useState('general');
   const navigate = useNavigate();
-
+  const [count, setCount] = useOutletContext();
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken')
@@ -32,7 +31,7 @@ export default function UserAccountPage() {
       value: 'general',
       label: 'General',
       icon: <Iconify icon="ic:round-account-box" />,
-      component: <AccountGeneral />,
+      component: <AccountGeneral setCount={setCount} />,
     },
     {
       value: 'change_password',

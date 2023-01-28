@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable react-hooks/exhaustive-deps */
 import * as Yup from 'yup';
 import { useState, useEffect } from 'react';
@@ -14,7 +15,8 @@ import { getInfoApi, updateInFoUserApi } from "../../apis/auth.api";
 
 // ----------------------------------------------------------------------
 
-export default function AccountGeneral() {
+export default function AccountGeneral(props) {
+  const { setCount } = props;
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState({
@@ -88,6 +90,8 @@ export default function AccountGeneral() {
       const res = await updateInFoUserApi(data, login)
 
       if (res.status === 200) {
+        // reload header
+        setCount((c) => c + 1)
         setLoading(false)
         localStorage.setItem('accessToken', res.data.token)
         getInfo(res.data.token)

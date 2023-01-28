@@ -53,6 +53,19 @@ export const addLessonUserApi = async (data, token) => {
     return response;
 };
 
+export const removeLessonUserApi = async (data, token) => {
+    const config = {
+        method: 'post',
+        url: `${URL_BE}users/removeLesson`,
+        headers: {
+            Authorization: `Bearer ${token}`
+        },
+        data
+    };
+    const response = await axios(config);
+    return response;
+};
+
 export const updateInFoUserApi = async (data, token) => {
     const config = {
         method: 'post',

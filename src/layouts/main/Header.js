@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable react/jsx-no-bind */
 import PropTypes from 'prop-types';
 import { useRef, useState, useEffect } from 'react';
@@ -26,12 +27,11 @@ import { getInfoApi } from '../../apis/auth.api';
 
 // ----------------------------------------------------------------------
 
-export default function Header() {
+export default function Header(props) {
+  const { infoUser, setInfoUser } = props;
   const carouselRef = useRef(null);
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuthContext();
   const [isLoggin, setIsLoggin] = useState(false);
-  const [_user, setUser] = useState({});
   const [anchorEl, setAnchorEl] = useState(null);
 
   function handleClick(event) {
@@ -47,23 +47,14 @@ export default function Header() {
   useEffect(() => {
     const token = localStorage.getItem('accessToken')
     if (token) {
-      getInfo(token);
       setIsLoggin(true)
     }
   }, [])
 
-  const getInfo = async (token) => {
-    const res = await getInfoApi(token);
-
-    if (res.status === 200) {
-      setUser(res.data.user)
-    }
-  }
-
   const handleLogout = () => {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('datn_email')
-    setUser({})
+    setInfoUser({})
     navigate(PATH_PAGE.home)
   }
 
@@ -101,14 +92,14 @@ export default function Header() {
 
           {isDesktop && <NavDesktop isOffset={isOffset} data={navConfig} />}
 
-          {_user.firstName ? (
+          {infoUser.firstName ? (
             <Box
               onClick={(e) => handleClick(e)}
               onMouseOver={(e) => handleClick(e)}
             >
               <NavItem
                 item={{
-                  title: `Hi, ${_user.firstName} ${_user.lastName}`
+                  title: `Hi, ${infoUser.firstName} ${infoUser.lastName}`
                 }} />
             </Box>
           ) : (
