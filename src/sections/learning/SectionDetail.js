@@ -87,12 +87,14 @@ const SectionDetail = () => {
     if (isLogin) {
       handleGetDetailResultExercise(detailLesson._id, currentExercise, isLogin)
     }
+    setResultIpa('')
   }, [currentExercise]);
 
   useEffect(() => {
     if (detailLesson.exercise && detailLesson.exercise.length > 0) {
       setCurrentExercise(detailLesson.exercise[currentExerciseIndex])
     }
+    setResultIpa('')
   }, [currentExerciseIndex])
 
   useEffect(() => {
