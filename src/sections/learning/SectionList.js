@@ -25,14 +25,15 @@ import { Link as RouterLink } from 'react-router-dom';
 import _ from 'lodash';
 import { useSnackbar } from 'notistack';
 import { useFormik } from 'formik';
-import { searchWordApi } from '../../apis/word.api';
+import { getListWordsApi, searchWordApi } from '../../apis/word.api';
 import {
   createLessonApi,
   getListLessonApi,
   getListLessonAuthApi,
   searchLessonApi,
   getListLessonUnAuthApi,
-  getDetailLessonApi
+  getDetailLessonApi,
+  updateLessonApi
 } from '../../apis/lesson.api';
 import Iconium from '../../components/iconify/Iconify';
 import { addLessonUserApi, removeLessonUserApi } from '../../apis/auth.api';
@@ -44,7 +45,7 @@ const SectionList = () => {
   const [open, setOpen] = useState(false);
   const [listWordSearch, setListWordSearch] = useState([]);
   const [currentEmailUser, setCurrentEmailUser] = useState('');
-  const [detailLesson, setDetailLesson] = useState({})
+  const [detailLesson, setDetailLesson] = useState({});
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -121,8 +122,7 @@ const SectionList = () => {
   };
 
   const onSelectWord = (words) => {
-    formik.values.exercises = words
-    console.log(formik.values.exercises)
+    formik.setFieldValue('exercises', words)
   }
 
   const formik = useFormik({
@@ -133,10 +133,19 @@ const SectionList = () => {
     },
 
     onSubmit: values => {
-      // callCreateApi(values);
-      // handleClosePopupSMS();
-      // handleCreateLesson(values)
-      console.log(values)
+      if (Object.keys(detailLesson).length === 0) {
+        handleCreateLesson(values)
+      } else {
+        const data = {
+          lessonId: detailLesson._id,
+          title: values.title,
+          description: values.description,
+          exercise: values.exercises.map(el => el.word)
+        }
+        console.log(data)
+        console.log(isLogin)
+        handleUpdateLesson(data)
+      }
     }
   });
 
@@ -227,24 +236,10 @@ const SectionList = () => {
     }
   }
 
-  const handleUpdateLesson = async (section) => {
+  const handleClickUpdateLesson = async (section) => {
     try {
-      console.log(section)
       setOpen(true);
       fetchDetailLesson(section._id)
-      // const data = {
-      //   lessonId: section._id
-      // }
-      // const token = isLogin
-      // const res = await removeLessonUserApi(data, token)
-
-      // if (res.status === 200) {
-      //   enqueueSnackbar('Add Success', { variant: 'success' });
-      //   fetchListLessonAuth(token)
-      //   fetchListLessonUnAuth(token)
-      // } else {
-      //   enqueueSnackbar('Add failed', { variant: 'error' });
-      // }
     } catch (error) {
       enqueueSnackbar(error.response.data.message, { variant: 'error' });
     }
@@ -255,14 +250,46 @@ const SectionList = () => {
 
     if (res.status === 200) {
       console.log('detail lesson', res.data.data)
+      fetListInitialWords(res.data.data.exercise)
       setDetailLesson(res.data.data)
-      formik.setValues({
-        title: res.data.data.title,
-        description: res.data.data.description,
-        exercises: res.data.data.exercise
-      })
+      formik.setFieldValue('title', res.data.data.title)
+      formik.setFieldValue('description', res.data.data.description)
     } else {
       console.log('err get detail lesson', res)
+    }
+  }
+
+  const fetListInitialWords = async (words) => {
+    try {
+      const data = {
+        list: words
+      }
+      const res = await getListWordsApi(data);
+
+      if (res.status === 200) {
+        setListWordSearch(res.data.data)
+        formik.setFieldValue('exercises', res.data.data)
+      } else {
+        console.log('err get list word', res.data)
+      }
+    } catch (error) {
+      console.log('error get list word', error)
+    }
+  }
+
+  const handleUpdateLesson = async (data) => {
+    try {
+      const res = await updateLessonApi(data, isLogin)
+
+      if (res.status === 200) {
+        enqueueSnackbar('Update Success', { variant: 'success' });
+        handleClose()
+        fetchListLessonAuth(isLogin)
+      } else {
+        enqueueSnackbar('Update failed', { variant: 'error' });
+      }
+    } catch (error) {
+      enqueueSnackbar(error.response.data.message, { variant: 'error' });
     }
   }
 
@@ -322,7 +349,10 @@ const SectionList = () => {
                       <CardHeader
                         action={
                           <Tooltip title="Remove lesson from my list lesson">
-                            <IconButton aria-label="settings" sx={{ width: '30x', height: 'auto' }} onClick={() => handleRemoveLesson(section)}>
+                            <IconButton
+                              aria-label="settings"
+                              sx={{ width: '30x', height: 'auto' }}
+                              onClick={() => handleRemoveLesson(section)}>
                               <Iconium icon="material-symbols:remove" width={20} />
                             </IconButton>
                           </Tooltip>
@@ -332,14 +362,22 @@ const SectionList = () => {
                       <CardHeader
                         action={
                           <Tooltip title="Add exercise to my lesson">
-                            <IconButton aria-label="settings" sx={{ width: '30x', height: 'auto' }} onClick={() => handleUpdateLesson(section)}>
+                            <IconButton
+                              aria-label="settings"
+                              sx={{ width: '30x', height: 'auto' }}
+                              onClick={() => handleClickUpdateLesson(section)}>
                               <Iconium icon="ph:pen-fill" width={20} />
                             </IconButton>
                           </Tooltip>
                         }
                       />
                     )}
-                    <Box padding={3} display="flex" justifyContent="center" alignItems="center" height={200}>
+                    <Box
+                      padding={3}
+                      display="flex"
+                      justifyContent="center"
+                      alignItems="center"
+                      height={200}>
                       {section.author === currentEmailUser
                         ? <Iconium icon="mdi:user-edit" width={48} />
                         : <Iconium icon="mdi:user" width={48} />
@@ -355,8 +393,14 @@ const SectionList = () => {
                       >
                         Section: {section.title}
                       </Link>
-                      <Typography sx={{ marginTop: '8px !important' }} fontSize={12}>Description: {section.description}</Typography>
-                      <Typography sx={{ marginTop: '0px !important' }} fontSize={12}>Done: {section.done} / {section.exercise?.length}</Typography>
+                      <Typography
+                        sx={{ marginTop: '8px !important' }}
+                        fontSize={12}
+                      >Description: {section.description}</Typography>
+                      <Typography
+                        sx={{ marginTop: '0px !important' }}
+                        fontSize={12}
+                      >Done: {section.done} / {section.exercise?.length}</Typography>
                     </Stack>
                   </Card>
                 ))}
@@ -487,7 +531,7 @@ const SectionList = () => {
             id="size-small-standard-multi"
             size="small"
             options={listWordSearch}
-            defaultValue={['hello']}
+            value={formik.values.exercises}
             getOptionLabel={(option) => option.word}
             onChange={(event, value) => {
               onSelectWord(value);

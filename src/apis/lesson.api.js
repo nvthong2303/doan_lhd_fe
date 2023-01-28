@@ -69,6 +69,19 @@ export const createLessonApi = async (data, token) => {
     return response;
 }
 
+export const updateLessonApi = async (data, token) => {
+    const config = {
+        method: 'post',
+        url: `${URL_BE}lesson/update`,
+        headers: {
+            Authorization: `Bearer ${token}`
+        },
+        data
+    };
+    const response = await axios(config);
+    return response;
+}
+
 export const getDetailLessonApi = async (id) => {
     const config = {
         method: 'get',

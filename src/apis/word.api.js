@@ -33,3 +33,16 @@ export const getDetailWordApi = async (word) => {
     const response = await axios(config);
     return response;
 }
+
+export const getListWordsApi = async (data) => {
+    const config = {
+        method: 'post',
+        url: `${URL_BE}word/list`,
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        data
+    };
+    const response = await axios(config);
+    return response;
+}
