@@ -46,7 +46,7 @@ export default function TranslationInfo({ listWordSearch }) {
                     xs={11}
                     sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', paddingTop: '5px' }}
                   >
-                    {item.meaning.replace('-', '***').split('***').map(el => (
+                    {item.meaning?.split('-')[2]?.split('***')?.map(el => (
                       <Typography variant="caption">{`${el}`}</Typography>
                     ))}
                   </Grid>
