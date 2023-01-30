@@ -28,24 +28,8 @@ export default function Login() {
             Create an account
           </Link>
         </Stack>
-
-        {/* <Tooltip title={method} placement="left">
-          <Box
-            component="img"
-            alt={method}
-            src={`/assets/icons/auth/ic_${method}.png`}
-            sx={{ width: 32, height: 32, position: 'absolute', right: 0 }}
-          />
-        </Tooltip> */}
       </Stack>
-
-      {/* <Alert severity="info" sx={{ mb: 3 }}>
-        Use email : <strong>demo@minimals.cc</strong> / password :<strong> demo1234</strong>
-      </Alert> */}
-
       <AuthLoginForm />
-
-      {/* <AuthWithSocial /> */}
     </LoginLayout>
   );
 }

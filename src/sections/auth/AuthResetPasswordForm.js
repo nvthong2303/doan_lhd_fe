@@ -6,6 +6,8 @@ import { useForm } from 'react-hook-form';
 // @mui
 import { LoadingButton } from '@mui/lab';
 // routes
+import { useSnackbar } from 'notistack';
+import { resetPasswordUserApi } from '../../apis/auth.api';
 import { PATH_AUTH } from '../../routes/paths';
 // components
 import FormProvider, { RHFTextField } from '../../components/hook-form';
@@ -14,6 +16,7 @@ import FormProvider, { RHFTextField } from '../../components/hook-form';
 
 export default function AuthResetPasswordForm() {
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
 
   const ResetPasswordSchema = Yup.object().shape({
     email: Yup.string().required('Email is required').email('Email must be a valid email address'),
@@ -21,7 +24,7 @@ export default function AuthResetPasswordForm() {
 
   const methods = useForm({
     resolver: yupResolver(ResetPasswordSchema),
-    defaultValues: { email: 'demo@minimals.cc' },
+    defaultValues: { email: '' },
   });
 
   const {
@@ -31,11 +34,13 @@ export default function AuthResetPasswordForm() {
 
   const onSubmit = async (data) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      sessionStorage.setItem('email-recovery', data.email);
-      navigate(PATH_AUTH.newPassword);
+      const res = await resetPasswordUserApi(data)
+      if (res.status === 200) {
+        enqueueSnackbar(res.data.message, { variant: 'success' });
+      }
     } catch (error) {
       console.error(error);
+      enqueueSnackbar('Reset password failed, try again.', { variant: 'error' });
     }
   };
 

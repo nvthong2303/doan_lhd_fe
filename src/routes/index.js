@@ -6,6 +6,7 @@ import CompactLayout from '../layouts/compact';
 import {
   LoginPage,
   RegisterPage,
+  ResetPasswordPage,
   Page404,
   HomePage,
   LearningSectionPage,
@@ -39,6 +40,14 @@ export default function Router() {
           element: (
             <GuestGuard>
               <RegisterPage />
+            </GuestGuard>
+          ),
+        },
+        {
+          path: 'reset-password',
+          element: (
+            <GuestGuard>
+              <ResetPasswordPage />
             </GuestGuard>
           ),
         },
