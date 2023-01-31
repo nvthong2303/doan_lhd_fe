@@ -295,10 +295,10 @@ const SectionDetail = () => {
   }
 
   const sort = (a, b) => {
-    if (a.createAt < b.createAt) {
+    if (a.createAt > b.createAt) {
       return -1;
     }
-    if (a.createAt > b.createAt) {
+    if (a.createAt < b.createAt) {
       return 1;
     }
     return 0;
