@@ -33,7 +33,8 @@ import {
   searchLessonApi,
   getListLessonUnAuthApi,
   getDetailLessonApi,
-  updateLessonApi
+  updateLessonApi,
+  deleteLessonApi
 } from '../../apis/lesson.api';
 import Iconium from '../../components/iconify/Iconify';
 import { addLessonUserApi, removeLessonUserApi } from '../../apis/auth.api';
@@ -43,6 +44,7 @@ const SectionList = () => {
   const [listUserLesson, setListUserLesson] = useState([]);
   const [isLogin, setIsLogin] = useState(null);
   const [open, setOpen] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
   const [listWordSearch, setListWordSearch] = useState([]);
   const [currentEmailUser, setCurrentEmailUser] = useState('');
   const [detailLesson, setDetailLesson] = useState({});
@@ -111,6 +113,11 @@ const SectionList = () => {
     setDetailLesson({})
   };
 
+  const handleCloseDelete = () => {
+    setOpenDelete(false);
+    setDetailLesson({})
+  };
+
   const handleSearchLesson = (value) => {
     searchLesson(value);
   };
@@ -142,8 +149,6 @@ const SectionList = () => {
           description: values.description,
           exercise: values.exercises.map(el => el.word)
         }
-        console.log(data)
-        console.log(isLogin)
         handleUpdateLesson(data)
       }
     }
@@ -249,7 +254,6 @@ const SectionList = () => {
     const res = await getDetailLessonApi(id)
 
     if (res.status === 200) {
-      console.log('detail lesson', res.data.data)
       fetListInitialWords(res.data.data.exercise)
       setDetailLesson(res.data.data)
       formik.setFieldValue('title', res.data.data.title)
@@ -287,6 +291,31 @@ const SectionList = () => {
         fetchListLessonAuth(isLogin)
       } else {
         enqueueSnackbar('Update failed', { variant: 'error' });
+      }
+    } catch (error) {
+      enqueueSnackbar(error.response.data.message, { variant: 'error' });
+    }
+  }
+
+  const handleClickDelete = (section) => {
+    setDetailLesson(section)
+    setOpenDelete(true)
+  }
+
+  const handleDeleteLesson = async () => {
+    try {
+      const data = {
+        lessonId: detailLesson._id
+      }
+      const res = await deleteLessonApi(data, isLogin)
+
+      if (res.status === 200) {
+        enqueueSnackbar('Delete Success', { variant: 'success' });
+        handleCloseDelete()
+        fetchListLessonAuth(isLogin)
+        fetchListLessonUnAuth(isLogin)
+      } else {
+        enqueueSnackbar(res.data.message, { variant: 'error' });
       }
     } catch (error) {
       enqueueSnackbar(error.response.data.message, { variant: 'error' });
@@ -361,14 +390,24 @@ const SectionList = () => {
                     ) : (
                       <CardHeader
                         action={
-                          <Tooltip title="Add exercise to my lesson">
-                            <IconButton
-                              aria-label="settings"
-                              sx={{ width: '30x', height: 'auto' }}
-                              onClick={() => handleClickUpdateLesson(section)}>
-                              <Iconium icon="ph:pen-fill" width={20} />
-                            </IconButton>
-                          </Tooltip>
+                          <>
+                            <Tooltip title="Update this lesson">
+                              <IconButton
+                                aria-label="settings"
+                                sx={{ width: '30x', height: 'auto' }}
+                                onClick={() => handleClickUpdateLesson(section)}>
+                                <Iconium icon="ph:pen-fill" width={20} />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Delete this lesson">
+                              <IconButton
+                                aria-label="settings"
+                                sx={{ width: '30x', height: 'auto' }}
+                                onClick={() => handleClickDelete(section)}>
+                                <Iconium icon="ph:trash" width={20} />
+                              </IconButton>
+                            </Tooltip>
+                          </>
                         }
                       />
                     )}
@@ -553,6 +592,19 @@ const SectionList = () => {
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
           <Button onClick={formik.submitForm}>{Object.keys(detailLesson).length === 0 ? 'Create' : 'Update'}</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={openDelete} onClose={handleCloseDelete}>
+        <DialogTitle>{Object.keys(detailLesson).length === 0 ? 'Create new lesson' : 'Update lesson'}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {`Are you sure delete lesson ${detailLesson.title} ?`}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDelete}>Cancel</Button>
+          <Button onClick={handleDeleteLesson}>Delete</Button>
         </DialogActions>
       </Dialog>
     </>

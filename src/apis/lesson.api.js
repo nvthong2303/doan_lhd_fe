@@ -106,3 +106,16 @@ export const addExerciseLessonApi = async (data, token) => {
     return response;
 }
 
+export const deleteLessonApi = async (data, token) => {
+    const config = {
+        method: 'post',
+        url: `${URL_BE}lesson/delete`,
+        headers: {
+            Authorization: `Bearer ${token}`
+        },
+        data
+    };
+    const response = await axios(config);
+    return response;
+}
+
