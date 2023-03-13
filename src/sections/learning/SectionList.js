@@ -177,7 +177,7 @@ const SectionList = () => {
 
   const searchWord = _.debounce(async (value) => {
     try {
-      const res = await searchWordApi(value)
+      const res = await searchWordApi(value, true)
 
       if (res.status === 200) {
         console.log(res.data)

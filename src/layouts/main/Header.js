@@ -22,7 +22,6 @@ import { NavItem } from './nav/desktop/NavItem';
 import navConfig from './nav/config-navigation';
 import NavMobile from './nav/mobile';
 import NavDesktop from './nav/desktop';
-import { useAuthContext } from '../../auth/useAuthContext';
 import { getInfoApi } from '../../apis/auth.api';
 
 // ----------------------------------------------------------------------

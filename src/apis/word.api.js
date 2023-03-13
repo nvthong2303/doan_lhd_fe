@@ -4,11 +4,12 @@ import {
     URL_BE
 } from 'src/config/config';
 
-export const searchWordApi = async (keyword) => {
+export const searchWordApi = async (keyword, isDictionary) => {
     const data = {
         "keyword": keyword,
         "skip": 0,
-        "limit": 20
+        "limit": 20,
+        "dictionary": isDictionary
     };
     const config = {
         method: 'post',
@@ -46,3 +47,18 @@ export const getListWordsApi = async (data) => {
     const response = await axios(config);
     return response;
 }
+
+export const contributeWordApi = async (data, token) => {
+    const config = {
+        method: 'post',
+        url: `${URL_BE}word/contribute`,
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+        },
+        data
+    };
+    const response = await axios(config);
+    return response;
+}
+
